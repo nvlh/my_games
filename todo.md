@@ -232,3 +232,8 @@
 - [x] 更新安装脚本，降低内存压力并确保构建成功后再启动 index.js。
 - [x] 更新 GitHub README/DEPLOY_VPS，明确首次部署必须完成安装和构建，后续启动不重复 npm install。
 - [x] 验证生产构建、index.js 启动和恢复步骤，并保存发布版本。
+
+# GitHub 入口修复
+
+- [ ] 修复 GitHub 根目录 `index.js` 不应直接依赖缺失 `dist/index.js` 的问题。
+- [ ] 验证新的 GitHub 启动入口并推送到 `nvlh/my_games`。

@@ -32,13 +32,13 @@ pnpm test
 pnpm dev
 ```
 
-生产构建完成后，翼龙只需将主文件设置为根目录 `index.js`。如果面板不能输入启动命令，请直接打开 `index.js`，修改这一行：
+翼龙只需将主文件设置为根目录 `index.js`。当前入口直接运行项目源代码和 Vite 中间件，不读取或创建 `dist/`。如果面板不能输入启动命令，请直接打开 `index.js`，修改这一行：
 
 ```js
 const FIXED_PORT = 3600;
 ```
 
-把 `3600` 换成翼龙分配的 TCP 端口，并保持 `const USE_PANEL_PORT = false;` 不变。`index.js` 会自动加载 `dist/index.js`，监听 `0.0.0.0`，无需在面板中输入 `PORT=...` 命令。
+把 `3600` 换成翼龙分配的 TCP 端口。`index.js` 会直接启动 `server/_core/index.ts`，由 Vite 在运行时提供前端页面和静态资源，不读取 `dist/index.js`，无需在面板中输入 `PORT=...` 命令。必须保留 `devDependencies`，因为入口需要使用 `tsx`。
 
 ## 必需环境变量
 
@@ -56,7 +56,7 @@ const FIXED_PORT = 3600;
 
 ## 翼龙 Node VPS 一键安装
 
-在翼龙服务器的 Console 中执行下面的命令。它会从 GitHub 克隆项目、启用 pnpm、安装依赖并生成 `dist/index.js`；根目录 `index.js` 是翼龙默认启动入口，不会自动启动常驻进程，也不会覆盖已有 `.env` 文件。
+在翼龙服务器的 Console 中执行下面的命令。它会从 GitHub 克隆项目、启用 pnpm 并安装完整依赖；根目录 `index.js` 是翼龙默认启动入口，直接运行源代码，不生成或读取 `dist/index.js`，也不会覆盖已有 `.env` 文件。
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/nvlh/my_games/main/install-pterodactyl.sh | bash
@@ -81,7 +81,6 @@ bash install-pterodactyl.sh
 
 ```js
 const FIXED_PORT = 3600;
-const USE_PANEL_PORT = false;
 ```
 
 其中 `3600` 必须改成翼龙分配的实际 TCP 端口。不要把 `{{SERVER_PORT}}` 写进 `FIXED_PORT`。如果面板要求填写 Main File，应填写根目录的：
@@ -90,7 +89,7 @@ const USE_PANEL_PORT = false;
 index.js
 ```
 
-根目录 `index.js` 会加载生产构建文件 `dist/index.js`。
+根目录 `index.js` 会直接启动 `server/_core/index.ts` 和 Vite 中间件，不需要 `dist/`。如果日志显示找不到 `tsx`，说明安装时没有保留 `devDependencies`，请不要使用 `npm install --omit=dev`。
 
 ## 数据库迁移
 
@@ -104,7 +103,7 @@ index.js
 
 ## 受限 VPS 注意事项
 
-如果日志出现 `Killed /usr/local/bin/npm install`，表示容器在安装依赖时触发了内存限制；后面的 `Cannot find module '/home/container/dist/index.js'` 只是因为安装和构建没有完成，并不是端口错误。请先使用更大内存的 Node 容器，或让主机管理员提高内存限制，然后重新完成依赖安装和 `pnpm build`。安装脚本已关闭 npm 审计、资金提示和进度输出，并启用兼容参数，但无法绕过容器本身的内存上限。
+如果日志出现 `Killed /usr/local/bin/npm install`，表示容器在安装依赖时触发了内存限制。当前入口不再需要构建 `dist/`，但仍必须完成完整依赖安装，因为入口需要 `tsx`、Vite 和服务器依赖；请不要使用 `npm install --omit=dev`。
 
 若日志出现 `Invalid PORT: {{SERVER_PORT}}`，说明面板没有替换模板变量，请改用实际 TCP 端口。若通过域名访问返回 502，先确认启动日志含有 `Server running on 0.0.0.0:实际端口/`；如果有该行仍为 502，则需要由主机管理员把反向代理转发到同一个端口。普通无 root 用户通常不能修改系统级反向代理配置。
 

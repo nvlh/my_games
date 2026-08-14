@@ -22,10 +22,9 @@ APP_DIR=/home/container/xiaobawang-arcade bash install-pterodactyl.sh
 
 ```js
 const FIXED_PORT = 3600;
-const USE_PANEL_PORT = false;
 ```
 
-把 `3600` 换成翼龙实际分配的 TCP 端口，然后将 Main File 设置为 `index.js`。本地开发或手动构建仍可执行：
+把 `3600` 换成翼龙实际分配的 TCP 端口，然后将 Main File 设置为 `index.js`。当前入口直接运行源代码和 Vite 中间件，不读取或创建 `dist/`。本地开发仍可执行：
 
 ```bash
 pnpm install
@@ -50,23 +49,23 @@ pnpm build
 
 ## 翼龙面板（Pterodactyl / Pingless）
 
-翼龙默认启动模板可能会执行 `ts-node /home/container/${MAIN_FILE}`；本项目先构建到 `dist/index.js`，再由根目录 `index.js` 加载生产服务。请将 `MAIN_FILE` 设置为 `index.js`，或把启动命令改为下面的生产启动命令：
+翼龙默认启动模板可能会执行 `ts-node /home/container/${MAIN_FILE}`；本项目根目录 `index.js` 会直接使用 `tsx` 运行 `server/_core/index.ts` 和 Vite 中间件，不读取 `dist/index.js`。请将 `MAIN_FILE` 设置为 `index.js`。
 
 ```bash
-NPM_CONFIG_LEGACY_PEER_DEPS=true npm install && npm run build && PORT=${SERVER_PORT} NODE_ENV=production node index.js
+npm install && NODE_ENV=development node index.js
 ```
 
 如果翼龙无法展开 `${SERVER_PORT}`，请改成实际数字端口，例如 `PORT=3600`；不要把 `{{SERVER_PORT}}` 原样传给 Node。
 
 如果翼龙面板会自动执行 `npm install`，请在环境变量中设置 `NPM_CONFIG_LEGACY_PEER_DEPS=true`，或在安装命令中加入 `--legacy-peer-deps`。当前项目已移除与 Vite 7 不兼容的 JSX 定位插件，正常情况下不再需要该兼容参数。
 
-如果面板支持环境变量，可以把 `USE_PANEL_PORT` 改为 `true`，让 `index.js` 读取翼龙注入的 `PORT`；如果面板不支持输入命令或变量，则保持 `USE_PANEL_PORT = false`，直接编辑 `FIXED_PORT`。不要把 `{{SERVER_PORT}}` 原样写进端口配置。
+当前入口使用 `FIXED_PORT` 固定端口，适合不能输入命令的面板。请直接编辑 `index.js` 顶部的端口数字，不要把 `{{SERVER_PORT}}` 原样写进端口配置。
 
-请把 `MAIN_FILE` 设置为 `index.js`。根目录 `index.js` 会加载生产构建文件 `dist/index.js`，并确保构建步骤已经先执行。
+请把 `MAIN_FILE` 设置为 `index.js`。根目录 `index.js` 会直接启动源代码和 Vite，不需要 `dist/`；安装时必须保留 `devDependencies`，因为入口依赖 `tsx`。
 
 ## HTTP 502 排查
 
-HTTP 502 表示域名代理没有连接到 Node 服务，常见原因是主文件没有设置为 `index.js`、构建后的 `dist/index.js` 不存在、`FIXED_PORT` 与翼龙分配端口不一致，或反向代理转发到了错误端口。启动成功日志应包含 `Server running on 0.0.0.0:实际端口/`；如果没有这行，说明 Node 尚未成功启动。如果有这行但域名仍为 502，说明代理目标端口需要改成相同的实际端口。
+HTTP 502 表示域名代理没有连接到 Node 服务，常见原因是主文件没有设置为 `index.js`、`tsx` 或依赖没有安装、`FIXED_PORT` 与翼龙分配端口不一致，或反向代理转发到了错误端口。启动成功日志应包含 `Server running on 0.0.0.0:实际端口/`；如果没有这行，说明 Node 尚未成功启动。如果有这行但域名仍为 502，说明代理目标端口需要改成相同的实际端口。
 
 ### 翼龙自动 npm install 被 Killed
 
@@ -77,9 +76,9 @@ npm install
 node /home/container/${MAIN_FILE}
 ```
 
-如果控制台出现 `Killed /usr/local/bin/npm install`，这是容器内存限制导致安装进程被系统终止。由于安装没有完成，随后就会出现 `Cannot find module '/home/container/dist/index.js'`。首次部署必须先完成一次依赖安装和 `pnpm build`；后续重启不要重复安装依赖。
+如果控制台出现 `Killed /usr/local/bin/npm install`，这是容器内存限制导致安装进程被系统终止。当前入口不需要构建 `dist/`，但必须完成完整依赖安装，因为需要 `tsx`、Vite 和服务器依赖；不要使用 `npm install --omit=dev`。
 
-如果可以编辑 Startup Command，请移除自动 `npm install`，只保留启动 `index.js`，并将 Main File 设置为 `index.js`。如果面板不能修改启动模板，请让主机管理员关闭 Egg 的自动安装步骤，或提高容器内存后完成一次安装构建。不能输入命令时，用户只需确认 Main File 为 `index.js`，并在项目根目录把 `FIXED_PORT` 改成翼龙分配端口，保持 `USE_PANEL_PORT = false`；但 `dist/index.js` 必须已经存在。
+如果可以编辑 Startup Command，可使用 `node index.js`，并将 Main File 设置为 `index.js`。如果面板不能修改启动模板，只需确认 Main File 为 `index.js`，在项目根目录把 `FIXED_PORT` 改成翼龙分配端口，并确保默认 npm install 没有使用 `--omit=dev`。
 
 启动成功后应看到：
 
