@@ -1,6 +1,6 @@
 import { COOKIE_NAME } from "@shared/const";
 import { z } from "zod";
-import { createPublicGame, deletePublicGame, deletePublicSave, getPublicSaveById, listPublicGames, listPublicSaves, renamePublicSave, savePublicSave } from "./db";
+import { createPublicGame, deletePublicGame, deletePublicSave, getPublicSaveById, listPublicGames, listPublicSaves, renamePublicSave, savePublicSave, updatePublicGame } from "./db";
 import { storageGetSignedUrl } from "./storage";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
@@ -53,6 +53,15 @@ export const appRouter = router({
       coverName: z.string().max(255).optional(), coverContentType: z.string().max(100).optional(), coverPayloadBase64: z.string().max(7_000_000).optional(),
       screenshotName: z.string().max(255).optional(), screenshotContentType: z.string().max(100).optional(), screenshotPayloadBase64: z.string().max(11_000_000).optional(),
     })).mutation(({ input }) => createPublicGame(input)),
+    update: publicProcedure.input(z.object({
+      gameId: z.number().int().positive(), name: z.string().trim().min(1).max(160), slug: z.string().trim().min(1).max(160),
+      platform: z.enum(["xiaobawang", "arcade", "nes", "gba", "wsc", "saturn", "psp"]),
+      genre: z.enum(["action", "shooter", "platform", "fighting", "racing", "puzzle", "rpg", "adventure", "sports", "other"]),
+      description: z.string().max(2000).optional(), players: z.string().min(1).max(32), input: z.string().min(1).max(80),
+      romName: z.string().max(255).optional(), romContentType: z.string().max(100).optional(), romPayloadBase64: z.string().max(42_000_000).optional(),
+      coverName: z.string().max(255).optional(), coverContentType: z.string().max(100).optional(), coverPayloadBase64: z.string().max(7_000_000).optional(),
+      screenshotName: z.string().max(255).optional(), screenshotContentType: z.string().max(100).optional(), screenshotPayloadBase64: z.string().max(11_000_000).optional(),
+    })).mutation(({ input }) => updatePublicGame(input)),
   }),
 
   // TODO: add feature routers here, e.g.

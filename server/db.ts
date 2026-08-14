@@ -209,6 +209,47 @@ export async function createPublicGame(input: {
   return created[0];
 }
 
+export async function updatePublicGame(input: {
+  gameId: number; name: string; slug: string; platform: string; genre: string; description?: string; players: string; input: string;
+  romName?: string; romContentType?: string; romPayloadBase64?: string;
+  coverName?: string; coverContentType?: string; coverPayloadBase64?: string;
+  screenshotName?: string; screenshotContentType?: string; screenshotPayloadBase64?: string;
+}) {
+  const db = await getDb();
+  if (!db) throw new Error("数据库暂不可用");
+  const existing = await getPublicGameById(input.gameId);
+  if (!existing) throw new Error("游戏不存在");
+  const slug = input.slug.toLowerCase().replace(/[^a-z0-9-]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 150) || existing.slug;
+  const updates: Partial<InsertPublicGame> = {
+    name: input.name.trim().slice(0, 160), slug, platform: input.platform, genre: input.genre,
+    description: input.description?.trim().slice(0, 2000) || null, players: input.players, input: input.input,
+  };
+  if (input.romPayloadBase64 && input.romName) {
+    validatePublicGameFile(input.romName, input.romContentType ?? "application/octet-stream", "rom");
+    const romBytes = Buffer.from(input.romPayloadBase64, "base64");
+    if (romBytes.length === 0 || romBytes.length > 30 * 1024 * 1024) throw new Error("游戏文件必须大于 0 且不超过 30 MB");
+    const rom = await storagePut(`public-games/${input.platform}/${slug}/rom/${safeFileName(input.romName)}`, romBytes, input.romContentType ?? "application/octet-stream");
+    updates.romKey = rom.key; updates.romName = input.romName.slice(0, 255); updates.romSizeBytes = romBytes.length; updates.romContentType = input.romContentType ?? "application/octet-stream";
+  }
+  if (input.coverPayloadBase64 && input.coverName) {
+    validatePublicGameFile(input.coverName, input.coverContentType ?? "image/webp", "image");
+    const bytes = Buffer.from(input.coverPayloadBase64, "base64");
+    if (bytes.length > 5 * 1024 * 1024) throw new Error("封面不能超过 5 MB");
+    const cover = await storagePut(`public-games/${input.platform}/${slug}/cover/${safeFileName(input.coverName)}`, bytes, input.coverContentType ?? "image/webp");
+    updates.coverKey = cover.key;
+  }
+  if (input.screenshotPayloadBase64 && input.screenshotName) {
+    validatePublicGameFile(input.screenshotName, input.screenshotContentType ?? "image/webp", "image");
+    const bytes = Buffer.from(input.screenshotPayloadBase64, "base64");
+    if (bytes.length > 8 * 1024 * 1024) throw new Error("截图不能超过 8 MB");
+    const screenshot = await storagePut(`public-games/${input.platform}/${slug}/screenshots/${safeFileName(input.screenshotName)}`, bytes, input.screenshotContentType ?? "image/webp");
+    updates.screenshotKeys = JSON.stringify([screenshot.key]);
+  }
+  await db.update(publicGames).set(updates).where(eq(publicGames.id, input.gameId));
+  const updated = await db.select().from(publicGames).where(eq(publicGames.id, input.gameId)).limit(1);
+  return updated[0];
+}
+
 export async function savePublicSave(input: { platform: string; gameSlug: string; saveId?: number; saveName?: string; payloadBase64: string; contentType?: string; expectedVersion?: number }) {
   if (input.payloadBase64.length > 2_800_000) throw new Error("公共存档不能超过 2 MB");
   const db = await getDb();

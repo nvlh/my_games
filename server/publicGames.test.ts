@@ -26,6 +26,11 @@ describe("publicGames", () => {
     expect(() => validatePublicGameFile("cover.svg", "image/svg+xml", "image")).toThrow("仅支持 WebP");
   });
 
+  it("validates edit IDs before touching the database", async () => {
+    const caller = appRouter.createCaller(createPublicContext());
+    await expect(caller.publicGames.update({ gameId: 0, name: "编辑测试", slug: "edit-test", platform: "nes", genre: "action", players: "单人", input: "键盘" })).rejects.toThrow();
+  });
+
   it("validates row deletion IDs before touching the database", async () => {
     const caller = appRouter.createCaller(createPublicContext());
     await expect(caller.publicGames.delete({ gameId: 0 })).rejects.toThrow();
