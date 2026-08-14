@@ -1,6 +1,8 @@
 // @vitest-environment happy-dom
 import React from "react";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+
+vi.mock("@/components/NesEmulator", () => ({ default: () => <div data-testid="test-nes-emulator" /> }));
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const updateMutate = vi.fn();
@@ -44,6 +46,19 @@ describe("Home public game editor interaction", () => {
     const fallback = screen.getByTestId("game-icon-tank-test");
     expect(fallback.className).toContain("game-icon-fallback");
     expect(fallback.querySelector("svg")).toBeTruthy();
+    cleanup();
+  });
+
+  it("keeps narrow-screen controls and action order available", () => {
+    Object.defineProperty(window, "innerWidth", { configurable: true, value: 375 });
+    render(<Home />);
+    const actions = screen.getByTestId("public-game-actions-tank-test");
+    expect(actions.querySelector('[data-testid="public-game-edit-tank-test"]')).toBeTruthy();
+    expect(actions.querySelector('[data-testid="public-game-download-tank-test"]')).toBeTruthy();
+    expect(actions.textContent?.indexOf("编辑")).toBeLessThan(actions.textContent?.indexOf("下载") ?? -1);
+    fireEvent.click(screen.getByTestId("public-game-start-tank-test"));
+    expect(screen.getByRole("dialog", { name: /坦克测试 游戏窗口/ })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "退出游戏" })).toBeTruthy();
     cleanup();
   });
 
