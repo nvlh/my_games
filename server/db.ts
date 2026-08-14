@@ -173,6 +173,7 @@ export async function createPublicGame(input: {
   name: string; slug: string; platform: string; genre: string; description?: string; players: string; input: string;
   romName: string; romContentType: string; romPayloadBase64: string;
   coverName?: string; coverContentType?: string; coverPayloadBase64?: string;
+  iconName?: string; iconContentType?: string; iconPayloadBase64?: string;
   screenshotName?: string; screenshotContentType?: string; screenshotPayloadBase64?: string;
 }) {
   const db = await getDb();
@@ -191,6 +192,14 @@ export async function createPublicGame(input: {
     const cover = await storagePut(`public-games/${input.platform}/${slug}/cover/${safeFileName(input.coverName ?? "cover.webp")}`, bytes, input.coverContentType ?? "image/webp");
     coverKey = cover.key;
   }
+  let iconKey: string | undefined;
+  if (input.iconPayloadBase64) {
+    validatePublicGameFile(input.iconName ?? "icon.webp", input.iconContentType ?? "image/webp", "image");
+    const bytes = Buffer.from(input.iconPayloadBase64, "base64");
+    if (bytes.length > 2 * 1024 * 1024) throw new Error("游戏图标不能超过 2 MB");
+    const icon = await storagePut(`public-games/${input.platform}/${slug}/icon/${safeFileName(input.iconName ?? "icon.webp")}`, bytes, input.iconContentType ?? "image/webp");
+    iconKey = icon.key;
+  }
   let screenshotKeys: string | undefined;
   if (input.screenshotPayloadBase64) {
     const bytes = Buffer.from(input.screenshotPayloadBase64, "base64");
@@ -202,7 +211,7 @@ export async function createPublicGame(input: {
     name: input.name.trim().slice(0, 160), slug, platform: input.platform, genre: input.genre,
     description: input.description?.trim().slice(0, 2000) || null, players: input.players, input: input.input,
     romKey: rom.key, romName: input.romName.slice(0, 255), romSizeBytes: romBytes.length, romContentType: input.romContentType,
-    coverKey: coverKey ?? null, screenshotKeys: screenshotKeys ?? null,
+    coverKey: coverKey ?? null, iconKey: iconKey ?? null, screenshotKeys: screenshotKeys ?? null,
   };
   await db.insert(publicGames).values(values);
   const created = await db.select().from(publicGames).where(eq(publicGames.slug, slug)).limit(1);
@@ -213,6 +222,7 @@ export async function updatePublicGame(input: {
   gameId: number; name: string; slug: string; platform: string; genre: string; description?: string; players: string; input: string;
   romName?: string; romContentType?: string; romPayloadBase64?: string;
   coverName?: string; coverContentType?: string; coverPayloadBase64?: string;
+  iconName?: string; iconContentType?: string; iconPayloadBase64?: string;
   screenshotName?: string; screenshotContentType?: string; screenshotPayloadBase64?: string;
 }) {
   const db = await getDb();
@@ -237,6 +247,13 @@ export async function updatePublicGame(input: {
     if (bytes.length > 5 * 1024 * 1024) throw new Error("封面不能超过 5 MB");
     const cover = await storagePut(`public-games/${input.platform}/${slug}/cover/${safeFileName(input.coverName)}`, bytes, input.coverContentType ?? "image/webp");
     updates.coverKey = cover.key;
+  }
+  if (input.iconPayloadBase64 && input.iconName) {
+    validatePublicGameFile(input.iconName, input.iconContentType ?? "image/webp", "image");
+    const bytes = Buffer.from(input.iconPayloadBase64, "base64");
+    if (bytes.length > 2 * 1024 * 1024) throw new Error("游戏图标不能超过 2 MB");
+    const icon = await storagePut(`public-games/${input.platform}/${slug}/icon/${safeFileName(input.iconName)}`, bytes, input.iconContentType ?? "image/webp");
+    updates.iconKey = icon.key;
   }
   if (input.screenshotPayloadBase64 && input.screenshotName) {
     validatePublicGameFile(input.screenshotName, input.screenshotContentType ?? "image/webp", "image");

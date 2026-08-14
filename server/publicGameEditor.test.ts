@@ -15,12 +15,15 @@ describe("public game editor workflow strategy", () => {
     expect(input).toEqual({ ...toPublicGameEditorForm(game), gameId: 7 });
     expect("romPayloadBase64" in input).toBe(false);
     expect("coverPayloadBase64" in input).toBe(false);
+    expect("iconPayloadBase64" in input).toBe(false);
     expect("screenshotPayloadBase64" in input).toBe(false);
   });
 
   it("adds only the selected replacement file payloads", () => {
-    const input = buildPublicGameUpdateInput(game.id, toPublicGameEditorForm(game), { rom: { name: "new.nes", contentType: "application/octet-stream", payloadBase64: "AA==" } });
+    const input = buildPublicGameUpdateInput(game.id, toPublicGameEditorForm(game), { rom: { name: "new.nes", contentType: "application/octet-stream", payloadBase64: "AA==" }, icon: { name: "tank.png", contentType: "image/png", payloadBase64: "iVBORw==" } });
     expect(input.romName).toBe("new.nes");
+    expect(input.iconName).toBe("tank.png");
+    expect(input.iconContentType).toBe("image/png");
     expect(input.coverPayloadBase64).toBeUndefined();
     expect(shouldCloseEditorAfterSuccess(true)).toBe(true);
     expect(shouldCloseEditorAfterSuccess(false)).toBe(false);

@@ -1,0 +1,1 @@
+ALTER TABLE `public_games` ADD `iconKey` varchar(255);

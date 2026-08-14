@@ -40,6 +40,7 @@ export const appRouter = router({
         ...game,
         romUrl: `/manus-storage/${game.romKey}`,
         coverUrl: game.coverKey ? `/manus-storage/${game.coverKey}` : null,
+        iconUrl: game.iconKey ? `/manus-storage/${game.iconKey}` : null,
         screenshotUrls: game.screenshotKeys ? (JSON.parse(game.screenshotKeys) as string[]).map((key) => `/manus-storage/${key}`) : [],
       }));
     }),
@@ -51,6 +52,7 @@ export const appRouter = router({
       description: z.string().max(2000).optional(), players: z.string().min(1).max(32), input: z.string().min(1).max(80),
       romName: z.string().min(1).max(255), romContentType: z.string().max(100), romPayloadBase64: z.string().min(1).max(42_000_000),
       coverName: z.string().max(255).optional(), coverContentType: z.string().max(100).optional(), coverPayloadBase64: z.string().max(7_000_000).optional(),
+      iconName: z.string().max(255).optional(), iconContentType: z.string().max(100).optional(), iconPayloadBase64: z.string().max(3_000_000).optional(),
       screenshotName: z.string().max(255).optional(), screenshotContentType: z.string().max(100).optional(), screenshotPayloadBase64: z.string().max(11_000_000).optional(),
     })).mutation(({ input }) => createPublicGame(input)),
     update: publicProcedure.input(z.object({
@@ -60,6 +62,7 @@ export const appRouter = router({
       description: z.string().max(2000).optional(), players: z.string().min(1).max(32), input: z.string().min(1).max(80),
       romName: z.string().max(255).optional(), romContentType: z.string().max(100).optional(), romPayloadBase64: z.string().max(42_000_000).optional(),
       coverName: z.string().max(255).optional(), coverContentType: z.string().max(100).optional(), coverPayloadBase64: z.string().max(7_000_000).optional(),
+      iconName: z.string().max(255).optional(), iconContentType: z.string().max(100).optional(), iconPayloadBase64: z.string().max(3_000_000).optional(),
       screenshotName: z.string().max(255).optional(), screenshotContentType: z.string().max(100).optional(), screenshotPayloadBase64: z.string().max(11_000_000).optional(),
     })).mutation(({ input }) => updatePublicGame(input)),
   }),

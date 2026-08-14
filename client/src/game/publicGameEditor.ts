@@ -35,13 +35,14 @@ export function toPublicGameEditorForm(game: PublicGameEditorRecord): PublicGame
 export function buildPublicGameUpdateInput(
   gameId: number,
   form: PublicGameEditorForm,
-  files: { rom?: OptionalFilePayload; cover?: OptionalFilePayload; screenshot?: OptionalFilePayload } = {},
+  files: { rom?: OptionalFilePayload; cover?: OptionalFilePayload; icon?: OptionalFilePayload; screenshot?: OptionalFilePayload } = {},
 ) {
   return {
     gameId,
     ...form,
     ...(files.rom ? { romName: files.rom.name, romContentType: files.rom.contentType, romPayloadBase64: files.rom.payloadBase64 } : {}),
     ...(files.cover ? { coverName: files.cover.name, coverContentType: files.cover.contentType, coverPayloadBase64: files.cover.payloadBase64 } : {}),
+    ...(files.icon ? { iconName: files.icon.name, iconContentType: files.icon.contentType, iconPayloadBase64: files.icon.payloadBase64 } : {}),
     ...(files.screenshot ? { screenshotName: files.screenshot.name, screenshotContentType: files.screenshot.contentType, screenshotPayloadBase64: files.screenshot.payloadBase64 } : {}),
   };
 }

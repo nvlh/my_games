@@ -55,6 +55,7 @@ export const publicGames = mysqlTable("public_games", {
   romSizeBytes: int("romSizeBytes").notNull(),
   romContentType: varchar("romContentType", { length: 100 }).notNull(),
   coverKey: varchar("coverKey", { length: 255 }),
+  iconKey: varchar("iconKey", { length: 255 }),
   screenshotKeys: text("screenshotKeys"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),

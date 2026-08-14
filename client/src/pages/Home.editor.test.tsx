@@ -1,4 +1,5 @@
 // @vitest-environment happy-dom
+import React from "react";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -9,7 +10,7 @@ const mutationConfigs: Array<{ onSuccess?: () => void }> = [];
 vi.mock("@/lib/trpc", () => ({
   trpc: {
     publicGames: {
-      list: { useQuery: () => ({ data: [{ id: 7, name: "坦克测试", slug: "tank-test", platform: "nes", genre: "action", description: "旧简介", players: "单人", input: "键盘", romUrl: "/rom.nes", romName: "tank.nes" }] }) },
+      list: { useQuery: () => ({ data: [{ id: 7, name: "坦克测试", slug: "tank-test", platform: "nes", genre: "action", description: "旧简介", players: "单人", input: "键盘", romUrl: "/rom.nes", romName: "tank.nes", iconUrl: "/icon.png" }] }) },
       delete: { useMutation: () => ({ isPending: false, mutate: vi.fn() }) },
       create: { useMutation: (options: { onSuccess?: () => void }) => { mutationConfigs.push(options); return { isPending: false, mutate: vi.fn() }; } },
       update: { useMutation: (options: { onSuccess?: () => void }) => { mutationConfigs.push(options); return { isPending: false, mutate: (input: unknown) => { updateMutate(input); options.onSuccess?.(); } }; } },
@@ -36,10 +37,13 @@ describe("Home public game editor interaction", () => {
 
   it("opens, backfills, submits without replacement files, closes, and refreshes", () => {
     render(<Home />);
+    expect(screen.getByTestId("game-icon-tank-test").getAttribute("src")).toBe("/icon.png");
     fireEvent.click(screen.getByTestId("public-game-edit-tank-test"));
 
     expect(screen.getByTestId("public-game-editor")).toBeTruthy();
     expect((screen.getByTestId("public-game-editor-name") as HTMLInputElement).value).toBe("坦克测试");
+    expect(screen.getByTestId("public-game-editor-icon")).toBeTruthy();
+    expect(screen.getByTestId("public-game-editor-current-icon")).toBeTruthy();
 
     fireEvent.click(screen.getByTestId("public-game-editor-submit"));
 
