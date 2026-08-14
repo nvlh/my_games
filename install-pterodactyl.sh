@@ -11,7 +11,7 @@ usage() {
   bash install-pterodactyl.sh
   APP_DIR=/home/container/game APP_PORT=3600 bash install-pterodactyl.sh
 
-脚本只负责下载、安装依赖和构建，不会启动常驻 Node 进程，也不会覆盖已有 .env 文件。
+脚本只负责下载和安装完整依赖，不会构建或读取 dist/，也不会启动常驻 Node 进程或覆盖已有 .env 文件。
 EOF
 }
 
@@ -74,12 +74,6 @@ else
   pnpm install --reporter=silent
 fi
 
-pnpm build
-
-if [[ ! -f dist/index.js ]]; then
-  echo "错误：构建结束但没有找到 dist/index.js。" >&2
-  exit 1
-fi
 if [[ ! -f index.js ]]; then
   echo "错误：项目根目录没有找到 index.js 启动入口。" >&2
   exit 1
@@ -87,12 +81,15 @@ fi
 
 cat <<EOF
 
-安装和构建完成。
+安装完成。
 
-翼龙 Startup Command：
-  PORT=\${SERVER_PORT} NODE_ENV=production npm start
+翼龙 Main File：
+  index.js
 
-如果面板不能展开变量，请把 \${SERVER_PORT} 替换为翼龙分配的实际 TCP 端口，例如 3600；不要把 {{SERVER_PORT}} 原样传给 Node。
+推荐启动命令：
+  NODE_ENV=development node index.js
+
+如果面板不能输入命令，只需把 index.js 顶部的 FIXED_PORT 改成翼龙分配的实际 TCP 端口，例如 3600；不要把 {{SERVER_PORT}} 原样传给 Node。
 项目目录：$APP_DIR
-生产入口：index.js（内部加载 dist/index.js）
+启动入口：index.js（直接运行 server/_core/index.ts，不依赖 dist/）
 EOF

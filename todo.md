@@ -235,5 +235,11 @@
 
 # GitHub 入口修复
 
-- [ ] 修复 GitHub 根目录 `index.js` 不应直接依赖缺失 `dist/index.js` 的问题。
-- [ ] 验证新的 GitHub 启动入口并推送到 `nvlh/my_games`。
+- [x] 修复 GitHub 根目录 `index.js` 不应直接依赖缺失 `dist/index.js` 的问题。
+- [x] 验证新的 GitHub 启动入口并推送到 `nvlh/my_games`。
+
+# GitHub 无 dist 部署链路统一
+
+- [x] 更新 install-pterodactyl.sh，移除 pnpm build 和 dist/index.js 强制检查。
+- [x] 完成从零克隆后的 npm install + node index.js 启动验证。
+- [x] 统一 README、DEPLOY_VPS 和安装脚本的无 dist 说明。
