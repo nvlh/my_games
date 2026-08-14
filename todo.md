@@ -216,6 +216,12 @@
 
 # GitHub 最简 Node 入口
 
-- [ ] 将根目录 index.js 恢复为用户指定的 dist/index.js 静态导入入口。
-- [ ] 验证入口内容并同步推送到 nvlh/my_games。
-- [ ] 保存项目版本并报告 GitHub 提交结果。
+- [x] 将根目录 index.js 恢复为用户指定的 dist/index.js 静态导入入口。
+- [x] 验证入口内容并同步推送到 nvlh/my_games。
+- [x] 保存项目版本并报告 GitHub 提交结果。
+
+# 根目录 index.js 固定端口同步
+
+- [ ] 在 index.js 顶部增加 FIXED_PORT，保留根目录入口并在启动前设置 PORT。
+- [ ] 验证固定端口启动并推送更新到 nvlh/my_games。
+- [ ] 保存版本并明确告知用户端口修改行。
