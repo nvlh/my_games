@@ -44,6 +44,12 @@ fi
 corepack enable >/dev/null 2>&1 || true
 corepack prepare pnpm@10.4.1 --activate >/dev/null 2>&1 || true
 
+# 受限翼龙容器中关闭无关网络请求，减少安装阶段资源占用。
+export NPM_CONFIG_AUDIT=false
+export NPM_CONFIG_FUND=false
+export NPM_CONFIG_PROGRESS=false
+export NPM_CONFIG_LEGACY_PEER_DEPS=true
+
 if [[ -d "$APP_DIR/.git" ]]; then
   echo "更新已有项目：$APP_DIR"
   git -C "$APP_DIR" fetch --depth=1 origin "$BRANCH"
@@ -63,9 +69,9 @@ if [[ ! -f package.json ]]; then
 fi
 
 if [[ -f pnpm-lock.yaml ]]; then
-  pnpm install --frozen-lockfile
+  pnpm install --frozen-lockfile --reporter=silent
 else
-  pnpm install
+  pnpm install --reporter=silent
 fi
 
 pnpm build

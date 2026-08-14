@@ -32,14 +32,13 @@ pnpm test
 pnpm dev
 ```
 
-生产构建和启动命令如下：
+生产构建完成后，翼龙只需将主文件设置为根目录 `index.js`。如果面板不能输入启动命令，请直接打开 `index.js`，修改这一行：
 
-```bash
-pnpm build
-PORT=3000 NODE_ENV=production node index.js
+```js
+const FIXED_PORT = 3600;
 ```
 
-Node 服务会监听 `0.0.0.0`，端口由 `PORT` 环境变量提供。不要在代码或面板中把端口写死为 `3000`。
+把 `3600` 换成翼龙分配的 TCP 端口，并保持 `const USE_PANEL_PORT = false;` 不变。`index.js` 会自动加载 `dist/index.js`，监听 `0.0.0.0`，无需在面板中输入 `PORT=...` 命令。
 
 ## 必需环境变量
 
@@ -78,19 +77,14 @@ bash install-pterodactyl.sh
 bash install-pterodactyl.sh
 ```
 
-安装完成后，把翼龙 Startup Command 设置为：
+安装完成后，如果面板允许填写 Main File，请填写根目录的 `index.js`。如果面板不能输入 Startup Command，则不需要填写命令；直接在项目根目录 `index.js` 中修改：
 
-```bash
-PORT=${SERVER_PORT} NODE_ENV=production node index.js
+```js
+const FIXED_PORT = 3600;
+const USE_PANEL_PORT = false;
 ```
 
-若面板不能展开 `${SERVER_PORT}`，请改成翼龙分配的实际端口，例如 `3600`：
-
-```bash
-PORT=3600 NODE_ENV=production node index.js
-```
-
-不要写成 `PORT={{SERVER_PORT}}`。如果面板要求填写 Main File，应填写根目录的：
+其中 `3600` 必须改成翼龙分配的实际 TCP 端口。不要把 `{{SERVER_PORT}}` 写进 `FIXED_PORT`。如果面板要求填写 Main File，应填写根目录的：
 
 ```text
 index.js
@@ -110,7 +104,9 @@ index.js
 
 ## 受限 VPS 注意事项
 
-若日志出现 `Invalid PORT: {{SERVER_PORT}}`，说明面板没有替换模板变量，请改用实际 TCP 端口。若通过域名访问返回 404，但通过 `服务器 IP:端口` 可以访问，说明 Node 服务已经运行，仍需由主机管理员配置 Nginx 或 Caddy 反向代理。普通无 root 用户通常不能修改系统级反向代理配置。
+如果日志出现 `Killed /usr/local/bin/npm install`，表示容器在安装依赖时触发了内存限制；后面的 `Cannot find module '/home/container/dist/index.js'` 只是因为安装和构建没有完成，并不是端口错误。请先使用更大内存的 Node 容器，或让主机管理员提高内存限制，然后重新完成依赖安装和 `pnpm build`。安装脚本已关闭 npm 审计、资金提示和进度输出，并启用兼容参数，但无法绕过容器本身的内存上限。
+
+若日志出现 `Invalid PORT: {{SERVER_PORT}}`，说明面板没有替换模板变量，请改用实际 TCP 端口。若通过域名访问返回 502，先确认启动日志含有 `Server running on 0.0.0.0:实际端口/`；如果有该行仍为 502，则需要由主机管理员把反向代理转发到同一个端口。普通无 root 用户通常不能修改系统级反向代理配置。
 
 ## 许可证与资源边界
 

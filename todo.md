@@ -222,6 +222,13 @@
 
 # 根目录 index.js 固定端口同步
 
-- [ ] 在 index.js 顶部增加 FIXED_PORT，保留根目录入口并在启动前设置 PORT。
-- [ ] 验证固定端口启动并推送更新到 nvlh/my_games。
-- [ ] 保存版本并明确告知用户端口修改行。
+- [x] 在 index.js 顶部增加 FIXED_PORT，保留根目录入口并在启动前设置 PORT。
+- [x] 验证固定端口启动并推送更新到 nvlh/my_games。
+- [x] 保存版本并明确告知用户端口修改行。
+
+# 翼龙 npm install OOM 与缺失 dist
+
+- [x] 处理翼龙启动前 npm install 被 Killed 导致依赖和 dist/index.js 未生成的问题。
+- [x] 更新安装脚本，降低内存压力并确保构建成功后再启动 index.js。
+- [x] 更新 GitHub README/DEPLOY_VPS，明确首次部署必须完成安装和构建，后续启动不重复 npm install。
+- [x] 验证生产构建、index.js 启动和恢复步骤，并保存发布版本。
