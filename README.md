@@ -36,7 +36,7 @@ pnpm dev
 
 ```bash
 pnpm build
-PORT=3000 NODE_ENV=production npm start
+PORT=3000 NODE_ENV=production node index.js
 ```
 
 Node 服务会监听 `0.0.0.0`，端口由 `PORT` 环境变量提供。不要在代码或面板中把端口写死为 `3000`。
@@ -57,7 +57,7 @@ Node 服务会监听 `0.0.0.0`，端口由 `PORT` 环境变量提供。不要在
 
 ## 翼龙 Node VPS 一键安装
 
-在翼龙服务器的 Console 中执行下面的命令。它会从 GitHub 克隆项目、启用 pnpm、安装依赖并生成 `dist/index.js`，不会自动启动常驻进程，也不会覆盖已有 `.env` 文件。
+在翼龙服务器的 Console 中执行下面的命令。它会从 GitHub 克隆项目、启用 pnpm、安装依赖并生成 `dist/index.js`；根目录 `index.js` 是翼龙默认启动入口，不会自动启动常驻进程，也不会覆盖已有 `.env` 文件。
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/nvlh/my_games/main/install-pterodactyl.sh | bash
@@ -81,20 +81,22 @@ bash install-pterodactyl.sh
 安装完成后，把翼龙 Startup Command 设置为：
 
 ```bash
-PORT=${SERVER_PORT} NODE_ENV=production npm start
+PORT=${SERVER_PORT} NODE_ENV=production node index.js
 ```
 
 若面板不能展开 `${SERVER_PORT}`，请改成翼龙分配的实际端口，例如 `3600`：
 
 ```bash
-PORT=3600 NODE_ENV=production npm start
+PORT=3600 NODE_ENV=production node index.js
 ```
 
-不要写成 `PORT={{SERVER_PORT}}`，也不要把 `MAIN_FILE` 设置成根目录的 `index.js`。如果面板要求填写 Main File，应填写：
+不要写成 `PORT={{SERVER_PORT}}`。如果面板要求填写 Main File，应填写根目录的：
 
 ```text
-dist/index.js
+index.js
 ```
+
+根目录 `index.js` 会加载生产构建文件 `dist/index.js`。
 
 ## 数据库迁移
 
@@ -102,7 +104,7 @@ dist/index.js
 
 ## 游戏库使用方法
 
-打开网站后，页面会直接进入“我的游戏库”。使用平台筛选查看条目；使用“导入合法 ROM”读取当前浏览器会话中的本地 ROM；使用“游戏管理”上传拥有合法权利的 ROM、封面和截图。公开或本地 ROM 条目后面提供下载、开始、删除和存档入口。内置原创原型不提供 ROM 下载和删除，因此这两个按钮会显示为禁用状态。
+打开网站后，页面会直接进入“我的游戏库”。使用平台筛选查看条目；使用“导入合法 ROM”读取当前浏览器会话中的本地 ROM；使用每个公开游戏行后的“编辑”按钮修改已收录游戏；新游戏上传请通过现有公开游戏上传流程或管理入口完成。公开或本地 ROM 条目后面提供下载、开始、删除和存档入口。内置原创原型不提供 ROM 下载和删除，因此这两个按钮会显示为禁用状态。
 
 选择游戏条目后，存档下拉中第一项是“新存档”，其后是该游戏已有的历史存档。选中历史存档后，右侧会出现 X 删除按钮；存档、读取和覆盖操作始终跟随当前游戏，不再单独显示公共存档区域。
 

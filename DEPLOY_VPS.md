@@ -21,10 +21,10 @@ APP_DIR=/home/container/xiaobawang-arcade bash install-pterodactyl.sh
 脚本完成后，翼龙 Startup Command 使用：
 
 ```bash
-PORT=${SERVER_PORT} NODE_ENV=production npm start
+PORT=${SERVER_PORT} NODE_ENV=production node index.js
 ```
 
-若面板不能展开变量，请替换为翼龙实际分配的数字端口，例如 `PORT=3600 NODE_ENV=production npm start`。本地开发或手动构建仍可执行：
+若面板不能展开变量，请替换为翼龙实际分配的数字端口，例如 `PORT=3600 NODE_ENV=production node index.js`。本地开发或手动构建仍可执行：
 
 ```bash
 pnpm install
@@ -43,16 +43,16 @@ pnpm build
 
 如果主机日志显示 `Invalid PORT: {{SERVER_PORT}}`，说明主机没有替换翼龙模板变量。SVER00 这类受限 Node 主机必须在面板中使用实际数字 TCP 应用端口，例如 `3600`，不能把 `{{SERVER_PORT}}` 原样写入环境变量。
 
-设置 `PORT=3600`、`NODE_ENV=production`，启动命令使用 `npm start`。成功日志应为 `Server running on 0.0.0.0:3600/`。如果直接打开域名返回 404，但 `http://服务器IP:3600` 可以访问，说明 Node 服务正常，域名还需要由主机管理员配置反向代理到 `http://127.0.0.1:3600`；普通受限用户无法修改系统级 Nginx。
+设置 `PORT=3600`、`NODE_ENV=production`，启动命令使用 `node index.js`。成功日志应为 `Server running on 0.0.0.0:3600/`。如果直接打开域名返回 404，但 `http://服务器IP:3600` 可以访问，说明 Node 服务正常，域名还需要由主机管理员配置反向代理到 `http://127.0.0.1:3600`；普通受限用户无法修改系统级 Nginx。
 
 `OAUTH_SERVER_URL is not configured` 只影响 OAuth 登录初始化，不影响当前匿名公共存档和公开游戏库页面；只有启用登录功能时才需要配置真实 OAuth 服务地址。
 
 ## 翼龙面板（Pterodactyl / Pingless）
 
-翼龙默认启动模板可能会执行 `ts-node /home/container/${MAIN_FILE}`；本项目不是直接运行源码入口，而是先构建到 `dist/index.js`。请将 `MAIN_FILE` 设置为 `dist/index.js`，或把启动命令改为下面的生产启动命令：
+翼龙默认启动模板可能会执行 `ts-node /home/container/${MAIN_FILE}`；本项目先构建到 `dist/index.js`，再由根目录 `index.js` 加载生产服务。请将 `MAIN_FILE` 设置为 `index.js`，或把启动命令改为下面的生产启动命令：
 
 ```bash
-NPM_CONFIG_LEGACY_PEER_DEPS=true npm install && npm run build && PORT=${SERVER_PORT} NODE_ENV=production npm start
+NPM_CONFIG_LEGACY_PEER_DEPS=true npm install && npm run build && PORT=${SERVER_PORT} NODE_ENV=production node index.js
 ```
 
 如果翼龙无法展开 `${SERVER_PORT}`，请改成实际数字端口，例如 `PORT=3600`；不要把 `{{SERVER_PORT}}` 原样传给 Node。
@@ -66,7 +66,7 @@ PORT={{SERVER_PORT}}
 NODE_ENV=production
 ```
 
-不要把 `MAIN_FILE` 设置为 `index.js`，因为项目根目录没有这个文件；生产构建后真正的服务入口是 `dist/index.js`。如果使用面板原生启动变量，建议 `MAIN_FILE=dist/index.js`，并确保构建步骤已经先执行。
+请把 `MAIN_FILE` 设置为 `index.js`。根目录 `index.js` 会加载生产构建文件 `dist/index.js`，并确保构建步骤已经先执行。
 
 ## 反向代理
 

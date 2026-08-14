@@ -74,6 +74,10 @@ if [[ ! -f dist/index.js ]]; then
   echo "错误：构建结束但没有找到 dist/index.js。" >&2
   exit 1
 fi
+if [[ ! -f index.js ]]; then
+  echo "错误：项目根目录没有找到 index.js 启动入口。" >&2
+  exit 1
+fi
 
 cat <<EOF
 
@@ -84,5 +88,5 @@ cat <<EOF
 
 如果面板不能展开变量，请把 \${SERVER_PORT} 替换为翼龙分配的实际 TCP 端口，例如 3600；不要把 {{SERVER_PORT}} 原样传给 Node。
 项目目录：$APP_DIR
-生产入口：dist/index.js
+生产入口：index.js（内部加载 dist/index.js）
 EOF
