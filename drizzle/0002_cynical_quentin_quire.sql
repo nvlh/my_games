@@ -1,0 +1,20 @@
+CREATE TABLE `public_games` (
+	`id` int AUTO_INCREMENT NOT NULL,
+	`name` varchar(160) NOT NULL,
+	`slug` varchar(160) NOT NULL,
+	`platform` varchar(16) NOT NULL,
+	`genre` varchar(32) NOT NULL,
+	`description` text,
+	`players` varchar(32) NOT NULL,
+	`input` varchar(80) NOT NULL,
+	`romKey` varchar(255) NOT NULL,
+	`romName` varchar(255) NOT NULL,
+	`romSizeBytes` int NOT NULL,
+	`romContentType` varchar(100) NOT NULL,
+	`coverKey` varchar(255),
+	`screenshotKeys` text,
+	`createdAt` timestamp NOT NULL DEFAULT (now()),
+	`updatedAt` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,
+	CONSTRAINT `public_games_id` PRIMARY KEY(`id`),
+	CONSTRAINT `public_games_slug_unique` UNIQUE(`slug`)
+);
