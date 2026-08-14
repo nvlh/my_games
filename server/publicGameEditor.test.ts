@@ -7,7 +7,7 @@ describe("public game editor workflow strategy", () => {
   it("opens edit mode and maps the selected game into the form", () => {
     expect(isEditingPublicGame(game.id)).toBe(true);
     expect(getEditorView(game.id)).toEqual({ title: "编辑游戏", submitLabel: "保存修改", section: "EDIT" });
-    expect(toPublicGameEditorForm(game)).toEqual({ name: "坦克测试", slug: "tank-test", platform: "nes", genre: "action", description: "旧简介", players: "单人", input: "键盘" });
+    expect(toPublicGameEditorForm(game)).toEqual({ name: "坦克测试", slug: "tank-test", platform: "nes", genre: "action", description: "旧简介", players: "单人", input: "键盘", keySettings: "方向键/WASD；J/空格射击", fileLabel: "游戏文件", buttonLabel: "开始" });
   });
 
   it("builds update input without file fields when files are left blank", () => {

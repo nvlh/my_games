@@ -6,9 +6,12 @@ export type PublicGameEditorForm = {
   description: string;
   players: string;
   input: string;
+  keySettings: string;
+  fileLabel: string;
+  buttonLabel: string;
 };
 
-export type PublicGameEditorRecord = PublicGameEditorForm & { id: number };
+export type PublicGameEditorRecord = Omit<PublicGameEditorForm, "keySettings" | "fileLabel" | "buttonLabel"> & { id: number; keySettings?: string | null; fileLabel?: string | null; buttonLabel?: string | null };
 
 type OptionalFilePayload = {
   name: string;
@@ -29,6 +32,9 @@ export function toPublicGameEditorForm(game: PublicGameEditorRecord): PublicGame
     description: game.description,
     players: game.players,
     input: game.input,
+    keySettings: game.keySettings ?? "方向键/WASD；J/空格射击",
+    fileLabel: game.fileLabel ?? "游戏文件",
+    buttonLabel: game.buttonLabel ?? "开始",
   };
 }
 

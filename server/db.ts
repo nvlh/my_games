@@ -170,7 +170,7 @@ export async function getPublicGameById(id: number) {
 }
 
 export async function createPublicGame(input: {
-  name: string; slug: string; platform: string; genre: string; description?: string; players: string; input: string;
+  name: string; slug: string; platform: string; genre: string; description?: string; players: string; input: string; keySettings?: string; fileLabel?: string; buttonLabel?: string;
   romName: string; romContentType: string; romPayloadBase64: string;
   coverName?: string; coverContentType?: string; coverPayloadBase64?: string;
   iconName?: string; iconContentType?: string; iconPayloadBase64?: string;
@@ -210,6 +210,9 @@ export async function createPublicGame(input: {
   const values: InsertPublicGame = {
     name: input.name.trim().slice(0, 160), slug, platform: input.platform, genre: input.genre,
     description: input.description?.trim().slice(0, 2000) || null, players: input.players, input: input.input,
+    keySettings: input.keySettings?.trim().slice(0, 500) || null,
+    fileLabel: input.fileLabel?.trim().slice(0, 80) || "游戏文件",
+    buttonLabel: input.buttonLabel?.trim().slice(0, 80) || "开始",
     romKey: rom.key, romName: input.romName.slice(0, 255), romSizeBytes: romBytes.length, romContentType: input.romContentType,
     coverKey: coverKey ?? null, iconKey: iconKey ?? null, screenshotKeys: screenshotKeys ?? null,
   };
@@ -219,7 +222,7 @@ export async function createPublicGame(input: {
 }
 
 export async function updatePublicGame(input: {
-  gameId: number; name: string; slug: string; platform: string; genre: string; description?: string; players: string; input: string;
+  gameId: number; name: string; slug: string; platform: string; genre: string; description?: string; players: string; input: string; keySettings?: string; fileLabel?: string; buttonLabel?: string;
   romName?: string; romContentType?: string; romPayloadBase64?: string;
   coverName?: string; coverContentType?: string; coverPayloadBase64?: string;
   iconName?: string; iconContentType?: string; iconPayloadBase64?: string;
@@ -233,6 +236,9 @@ export async function updatePublicGame(input: {
   const updates: Partial<InsertPublicGame> = {
     name: input.name.trim().slice(0, 160), slug, platform: input.platform, genre: input.genre,
     description: input.description?.trim().slice(0, 2000) || null, players: input.players, input: input.input,
+    keySettings: input.keySettings?.trim().slice(0, 500) || null,
+    fileLabel: input.fileLabel?.trim().slice(0, 80) || existing.fileLabel || "游戏文件",
+    buttonLabel: input.buttonLabel?.trim().slice(0, 80) || existing.buttonLabel || "开始",
   };
   if (input.romPayloadBase64 && input.romName) {
     validatePublicGameFile(input.romName, input.romContentType ?? "application/octet-stream", "rom");

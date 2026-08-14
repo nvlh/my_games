@@ -11,7 +11,7 @@ const mutationConfigs: Array<{ onSuccess?: () => void }> = [];
 vi.mock("@/lib/trpc", () => ({
   trpc: {
     publicGames: {
-      list: { useQuery: () => ({ data: [{ id: 7, name: "坦克测试", slug: "tank-test", platform: "nes", genre: "action", description: "旧简介", players: "单人", input: "键盘", romUrl: "/rom.nes", romName: "tank.nes", iconUrl: mockedIconUrl }] }) },
+      list: { useQuery: () => ({ data: [{ id: 7, name: "坦克测试", slug: "tank-test", platform: "nes", genre: "action", description: "旧简介", players: "单人", input: "键盘", keySettings: "方向键移动；J 攻击", fileLabel: "ROM 文件", buttonLabel: "启动", romUrl: "/rom.nes", romName: "tank.nes", iconUrl: mockedIconUrl }] }) },
       delete: { useMutation: () => ({ isPending: false, mutate: vi.fn() }) },
       create: { useMutation: (options: { onSuccess?: () => void }) => { mutationConfigs.push(options); return { isPending: false, mutate: vi.fn() }; } },
       update: { useMutation: (options: { onSuccess?: () => void }) => { mutationConfigs.push(options); return { isPending: false, mutate: (input: unknown) => { updateMutate(input); options.onSuccess?.(); } }; } },
@@ -56,6 +56,11 @@ describe("Home public game editor interaction", () => {
     expect((screen.getByTestId("public-game-editor-name") as HTMLInputElement).value).toBe("坦克测试");
     expect(screen.getByTestId("public-game-editor-icon")).toBeTruthy();
     expect(screen.getByTestId("public-game-editor-current-icon")).toBeTruthy();
+    expect((screen.getByTestId("public-game-editor-key-settings") as HTMLTextAreaElement).value).toBe("方向键移动；J 攻击");
+    expect((screen.getByTestId("public-game-editor-file-label") as HTMLInputElement).value).toBe("ROM 文件");
+    expect((screen.getByTestId("public-game-editor-button-label") as HTMLInputElement).value).toBe("启动");
+    const actions = screen.getByTestId("public-game-actions-tank-test");
+    expect(actions.textContent?.indexOf("编辑")).toBeLessThan(actions.textContent?.indexOf("下载") ?? -1);
 
     fireEvent.click(screen.getByTestId("public-game-editor-submit"));
 
